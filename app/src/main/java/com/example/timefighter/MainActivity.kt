@@ -19,10 +19,13 @@ class MainActivity : AppCompatActivity() {
 
     internal lateinit var countDownTimer: CountDownTimer
     internal val initialCountDown: Long = 60000
+    internal var timeLeftOnTimer: Long = 60000
     internal val countDownInterval: Long = 1000
 
     companion object {
         private val TAG = MainActivity::class.java.simpleName
+        private const val SCORE_KEY = "SCORE_KEY"
+        private const val TIME_LEFT_KEY = "TIME_LEFT_KEY"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,10 +36,20 @@ class MainActivity : AppCompatActivity() {
         timeLeftTextView = findViewById(R.id.timeLeftTextView)
 
         Log.d(TAG, "onCreate called. Score is: $score")
-        resetGame()
         tapMeButton.setOnClickListener { _ ->
             incrementScore()
         }
+        if (savedInstanceState != null) {
+            score = savedInstanceState.getInt(SCORE_KEY)
+            timeLeftOnTimer = savedInstanceState.getLong(TIME_LEFT_KEY)
+            restoreGame()
+        } else {
+            resetGame()
+        }
+    }
+
+    private fun restoreGame() {
+        
     }
 
     private fun resetGame() {
@@ -45,6 +58,7 @@ class MainActivity : AppCompatActivity() {
         timeLeftTextView.text = getString(R.string.timeLeft, initialCountDown/1000)
         countDownTimer = object : CountDownTimer(initialCountDown, countDownInterval) {
             override fun onTick(millisUntilFinished: Long) {
+                timeLeftOnTimer = millisUntilFinished
                 timeLeftTextView.text = getString(R.string.timeLeft, millisUntilFinished/1000)
             }
 
@@ -72,5 +86,18 @@ class MainActivity : AppCompatActivity() {
     private fun endGame() {
         Toast.makeText(this, getString(R.string.gameOverMessage, score), Toast.LENGTH_SHORT).show()
         resetGame()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt(SCORE_KEY, score)
+        outState.putLong(TIME_LEFT_KEY, timeLeftOnTimer)
+        countDownTimer.cancel()
+        Log.d(TAG, "onSaveInstanceState, score: $score timeLeftOnTimer: $timeLeftOnTimer")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d(TAG, "onDestroy")
     }
 }
