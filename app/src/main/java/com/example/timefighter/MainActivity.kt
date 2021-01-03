@@ -49,7 +49,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun restoreGame() {
-        
+        gameScoreTextView.text = getString(R.string.yourScore, score)
+        timeLeftTextView.text = getString(R.string.timeLeft, timeLeftOnTimer/1000)
+        countDownTimer = object : CountDownTimer(timeLeftOnTimer, countDownInterval) {
+            override fun onTick(millisUntilFinished: Long) {
+                timeLeftOnTimer = millisUntilFinished
+                timeLeftTextView.text = getString(R.string.timeLeft, millisUntilFinished/1000)
+            }
+
+            override fun onFinish() {
+                endGame()
+            }
+        }
+        countDownTimer.start()
+        isGameStarted = true
     }
 
     private fun resetGame() {
